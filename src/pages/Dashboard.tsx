@@ -32,12 +32,30 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (tab: string) =
   const [data, setData] = useState<WellnessAnalytics | null>(null);
   const { user } = useAuth();
 
+  const [recentPosts, setRecentPosts] = useState<any[]>([]);
+  const [appointments, setAppointments] = useState<any[]>([]);
+
   useEffect(() => {
     api.getAnalytics().then(setData);
     api.getCommunityPosts().then(posts => setRecentPosts(posts.slice(0, 3)));
+    
+    // Subscribe to appointments
+    const unsubscribe = api.subscribeToAppointments((apptList) => {
+      setAppointments(apptList.filter(a => a.status === 'confirmed' || a.status === 'pending').slice(0, 1));
+    });
+    
+    return () => unsubscribe();
   }, []);
 
-  const [recentPosts, setRecentPosts] = useState<any[]>([]);
+  const handleCancelAppointment = async (id: string) => {
+    if (window.confirm("Are you sure you want to cancel this appointment?")) {
+      try {
+        await api.cancelAppointment(id);
+      } catch (error) {
+        console.error("Failed to cancel appointment:", error);
+      }
+    }
+  };
 
   if (!data) return (
     <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
@@ -266,13 +284,37 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (tab: string) =
                 Explore Meditation <ArrowUpRight className="w-3 h-3" />
               </button>
           </GlassCard>
-          <GlassCard className="bg-blue-600/10 border-blue-500/20 hover:scale-[1.02] cursor-pointer transition-all" onClick={() => onNavigate?.("appointments")}>
-              <h3 className="text-lg font-bold mb-2">Upcoming Session</h3>
-              <p className="text-xs text-white/40 mb-6 font-medium">Dr. Rohan Mehta • Clinical Psychologist<br />Today at 4:30 PM • Video Call</p>
-              <button className="text-xs font-bold text-blue-400 flex items-center gap-2 hover:gap-3 transition-all">
-                Prepare Session <ArrowUpRight className="w-3 h-3" />
-              </button>
-          </GlassCard>
+          {appointments.length > 0 ? (
+            <GlassCard className="bg-blue-600/10 border-blue-500/20 hover:scale-[1.02] cursor-pointer transition-all" onClick={() => onNavigate?.("appointments")}>
+               <div className="flex justify-between items-start mb-2">
+                 <h3 className="text-lg font-bold">Upcoming Session</h3>
+                 <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleCancelAppointment(appointments[0].id);
+                  }}
+                  className="text-[10px] font-bold text-red-400 hover:text-red-300 uppercase tracking-widest"
+                 >
+                   Cancel
+                 </button>
+               </div>
+               <p className="text-xs text-white/40 mb-6 font-medium">
+                 {appointments[0].specialistName}<br />
+                 {appointments[0].date} at {appointments[0].time} • Video Call
+               </p>
+               <button className="text-xs font-bold text-blue-400 flex items-center gap-2 hover:gap-3 transition-all">
+                 Prepare Session <ArrowUpRight className="w-3 h-3" />
+               </button>
+            </GlassCard>
+          ) : (
+            <GlassCard className="bg-blue-600/10 border-blue-500/20 hover:scale-[1.02] cursor-pointer transition-all" onClick={() => onNavigate?.("appointments")}>
+                <h3 className="text-lg font-bold mb-2">No Upcoming Sessions</h3>
+                <p className="text-xs text-white/40 mb-6 font-medium">Book a session with one of our verified specialists to start your journey.</p>
+                <button className="text-xs font-bold text-blue-400 flex items-center gap-2 hover:gap-3 transition-all">
+                  Book Now <ArrowUpRight className="w-3 h-3" />
+                </button>
+            </GlassCard>
+          )}
         </div>
       </section>
     </div>

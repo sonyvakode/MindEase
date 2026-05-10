@@ -21,6 +21,7 @@ const menuItems = [
   { id: "chatbot", icon: MessageSquare, label: "AI" },
   { id: "appointments", icon: Calendar, label: "Apps" },
   { id: "community", icon: Users, label: "Community" },
+  { id: "resources", icon: BookOpen, label: "Resources" },
 ];
 
 interface SidebarProps {

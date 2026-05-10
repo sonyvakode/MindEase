@@ -54,7 +54,7 @@ export default function Appointments({ onNavigate }: { onNavigate?: (tab: string
       await api.bookAppointment({
         specialistId: selectedSpecialist.id,
         specialistName: selectedSpecialist.name,
-        date: `2025-05-${selectedDate.toString().padStart(2, '0')}`,
+        date: `2026-05-${selectedDate.toString().padStart(2, '0')}`,
         time: selectedTime
       });
       setBooked(true);
@@ -135,7 +135,7 @@ export default function Appointments({ onNavigate }: { onNavigate?: (tab: string
                       <p className="text-sm font-bold text-white">{appt.specialistName}</p>
                       <button 
                         onClick={() => handleCancelRequest(appt)}
-                        className="text-[8px] text-red-400 hover:text-red-300 font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all"
+                        className="text-[8px] text-red-400 hover:text-red-300 font-bold uppercase tracking-widest transition-all"
                       >
                         Cancel
                       </button>
@@ -184,7 +184,7 @@ export default function Appointments({ onNavigate }: { onNavigate?: (tab: string
           <section>
             <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/30 mb-6">Choose Counsellor</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-              {specialists.slice(0, 3).map((s, i) => (
+              {specialists.slice(0, 5).map((s, i) => (
                 <motion.div
                   key={s.id}
                   initial={{ opacity: 0, y: 20 }}

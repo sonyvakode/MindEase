@@ -161,6 +161,30 @@ export const api = {
             education: "Ph.D. in Clinical Psychology, Stanford University",
             languages: ["English", "Hindi", "Punjabi"]
           },
+          { 
+            id: "2", 
+            name: "Dr. Rohan Mehta", 
+            specialty: "Mental Wellness Counsellor", 
+            image: "https://images.unsplash.com/photo-1537368910025-700350fe46c7?w=400&q=80",
+            rating: 4.8,
+            verified: true,
+            bio: "Specializing in student mental health and career counseling. Dr. Mehta employs a combination of positive psychology and solution-focused brief therapy to help individuals build resilience and find clarity.",
+            experience: "8 Years",
+            education: "M.A. in Applied Psychology, Delhi University",
+            languages: ["English", "Hindi", "Gujarati"]
+          },
+          { 
+            id: "3", 
+            name: "Dr. Priya Patel", 
+            specialty: "Behavioral Therapist", 
+            image: "https://images.unsplash.com/photo-1594824476967-48c8b964273f?w=400&q=80",
+            rating: 4.7,
+            verified: true,
+            bio: "Dr. Patel focuses on emotional regulation and neurodiversity support. She works closely with individuals to develop coping mechanisms and improve social-emotional skills.",
+            experience: "6 Years",
+            education: "M.Sc. in Psychological Research, University of Edinburgh",
+            languages: ["English", "Hindi", "Marathi"]
+          },
         ];
       }
       return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Specialist));
@@ -346,55 +370,65 @@ export const api = {
   },
 
   getResources: async (): Promise<Resource[]> => {
-    return [
-      {
-        id: "1",
-        title: "5-Minute Mindfulness Meditation",
-        category: "Meditation",
-        duration: "5 min",
-        image: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&q=80",
-        url: "https://www.youtube.com/watch?v=inpok4MKVLM"
-      },
-      {
-        id: "2",
-        title: "Box Breathing Technique",
-        category: "Breathing",
-        duration: "5 min",
-        image: "https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&q=80",
-        url: "https://www.youtube.com/watch?v=acUZdGd_3Dg"
-      },
-      {
-        id: "3",
-        title: "Deep Sleep & Relaxation Guide",
-        category: "Sleep",
-        duration: "15 min",
-        image: "https://images.unsplash.com/photo-1541480601022-2305c9f02487?auto=format&fit=crop&q=80",
-        url: "https://www.youtube.com/watch?v=nm1TxQj9IsQ"
-      },
-      {
-        id: "4",
-        title: "Managing Stress & Anxiety",
-        category: "Stress Relief",
-        duration: "10 min",
-        image: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&q=80",
-        url: "https://www.youtube.com/watch?v=WWloIAQpID0"
-      },
-      {
-        id: "5",
-        title: "Focus & Flow State Meditation",
-        category: "Meditation",
-        duration: "12 min",
-        image: "https://images.unsplash.com/photo-1499209974431-9dac3adaf471?auto=format&fit=crop&q=80",
-        url: "https://www.youtube.com/watch?v=86m4RL49uK4"
-      },
-      {
-        id: "6",
-        title: "4-7-8 Breathing for Better Sleep",
-        category: "Breathing",
-        duration: "8 min",
-        image: "https://images.unsplash.com/photo-1502129075440-6b60ad688b2a?auto=format&fit=crop&q=80",
-        url: "https://www.youtube.com/watch?v=PmBYdfv5RSk"
+    const path = "resources";
+    try {
+      const snapshot = await getDocs(collection(db, path));
+      if (snapshot.empty) {
+        return [
+          {
+            id: "1",
+            title: "5-Minute Mindfulness Meditation",
+            category: "Meditation",
+            duration: "5 min",
+            image: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&q=80",
+            url: "https://www.youtube.com/watch?v=inpok4MKVLM"
+          },
+          {
+            id: "2",
+            title: "Box Breathing Technique",
+            category: "Breathing",
+            duration: "5 min",
+            image: "https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&q=80",
+            url: "https://www.youtube.com/watch?v=acUZdGd_3Dg"
+          },
+          {
+            id: "3",
+            title: "Deep Sleep & Relaxation Guide",
+            category: "Sleep",
+            duration: "15 min",
+            image: "https://images.unsplash.com/photo-1541480601022-2305c9f02487?auto=format&fit=crop&q=80",
+            url: "https://www.youtube.com/watch?v=nm1TxQj9IsQ"
+          },
+          {
+            id: "4",
+            title: "Managing Stress & Anxiety",
+            category: "Stress Relief",
+            duration: "10 min",
+            image: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&q=80",
+            url: "https://www.youtube.com/watch?v=WWloIAQpID0"
+          },
+          {
+            id: "5",
+            title: "Focus & Flow State Meditation",
+            category: "Meditation",
+            duration: "12 min",
+            image: "https://images.unsplash.com/photo-1499209974431-9dac3adaf471?auto=format&fit=crop&q=80",
+            url: "https://www.youtube.com/watch?v=86m4RL49uK4"
+          },
+          {
+            id: "6",
+            title: "4-7-8 Breathing for Better Sleep",
+            category: "Breathing",
+            duration: "8 min",
+            image: "https://images.unsplash.com/photo-1502129075440-6b60ad688b2a?auto=format&fit=crop&q=80",
+            url: "https://www.youtube.com/watch?v=PmBYdfv5RSk"
+          }
+        ];
       }
-    ];
+      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Resource));
+    } catch (error) {
+      handleFirestoreError(error, OperationType.LIST, path);
+      return [];
+    }
   },
 };
