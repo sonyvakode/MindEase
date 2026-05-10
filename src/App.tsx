@@ -15,29 +15,33 @@ import { AuthProvider, useAuth } from "./components/AuthProvider";
 import { seedDatabase } from "./services/seed";
 
 function AppContent() {
-  const { user, loading, login } = useAuth();
+  const { user, loading } = useAuth();
   const [activeTab, setActiveTab] = useState("landing");
   const [navState, setNavState] = useState<any>(null);
+  const [hasRedirected, setHasRedirected] = useState(false);
 
+  // Effect to redirect and seed data
   useEffect(() => {
-    if (!loading && user) {
-      seedDatabase();
-    }
-  }, [loading, user]);
-
-  const handleNavigate = async (tab: string, state?: any) => {
-    // Protected routes
-    const protectedTabs = ["dashboard", "mood", "appointments", "community", "chatbot", "profile"];
-    if (protectedTabs.includes(tab) && !user) {
-      try {
-        await login();
-        setActiveTab(tab);
-        setNavState(state || null);
-      } catch (e) {
-        console.error("Login cancelled", e);
+    if (!loading) {
+      if (user) {
+        // Run seed once on login
+        seedDatabase();
+        // Redirect to dashboard ONLY IF we are on landing and haven't redirected this session
+        if (activeTab === "landing" && !hasRedirected) {
+          setActiveTab("dashboard");
+          setHasRedirected(true);
+        }
+      } else {
+        // Not logged in: reset redirection and force landing if trying to access protected areas
+        setHasRedirected(false);
+        if (activeTab !== "landing") {
+          setActiveTab("landing");
+        }
       }
-      return;
     }
+  }, [loading, user, hasRedirected, activeTab]);
+
+  const handleNavigate = (tab: string, state?: any) => {
     setActiveTab(tab);
     setNavState(state || null);
   };
@@ -46,12 +50,12 @@ function AppContent() {
     switch (activeTab) {
       case "landing": return <Landing onNavigate={handleNavigate} />;
       case "dashboard": return <Dashboard onNavigate={handleNavigate} />;
-      case "chatbot": return <Chatbot specialist={navState?.specialist} />;
+      case "chatbot": return <Chatbot onNavigate={handleNavigate} navigationState={navState} />;
       case "mood": return <MoodTracker onNavigate={handleNavigate} />;
       case "appointments": return <Appointments onNavigate={handleNavigate} />;
       case "resources": return <Resources />;
       case "community": return <Community />;
-      case "profile": return <Profile />;
+      case "profile": return <Profile onNavigate={handleNavigate} />;
       case "admin": return <Admin />;
       default: return <Dashboard onNavigate={handleNavigate} />;
     }
@@ -68,27 +72,23 @@ function AppContent() {
   }
 
   return (
-    <div className="min-h-screen bg-[#040D0E] relative overflow-hidden flex">
+    <div className="min-h-screen bg-[#040D0E] relative flex flex-col md:flex-row">
       <div className="atmosphere" />
       
       {!isLanding && <Sidebar activeTab={activeTab} setActiveTab={handleNavigate} />}
 
       <main className={cn(
-        "flex-1 min-h-screen relative z-10 overflow-y-auto",
-        !isLanding ? "ml-20 lg:ml-64 p-4 lg:p-8" : ""
+        "flex-1 min-h-screen relative z-10 overflow-x-hidden",
+        !isLanding ? "md:pl-20 lg:pl-64 pb-20 md:pb-0" : ""
       )}>
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeTab}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.3 }}
-            className={cn(isLanding ? "w-full" : "max-w-7xl mx-auto")}
-          >
+        <div className={cn(
+          "h-full",
+          !isLanding ? (activeTab === "chatbot" ? "p-2 sm:p-4 lg:p-8" : "p-4 sm:p-6 lg:p-8") : ""
+        )}>
+          <div className={cn(isLanding ? "w-full" : "max-w-7xl mx-auto h-full")}>
             {renderContent()}
-          </motion.div>
-        </AnimatePresence>
+          </div>
+        </div>
       </main>
     </div>
   );

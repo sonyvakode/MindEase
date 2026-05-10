@@ -24,6 +24,8 @@ import { cn } from "../lib/utils";
 export default function MoodTracker({ onNavigate }: { onNavigate?: (tab: string) => void }) {
   const [moods, setMoods] = useState<Mood[]>([]);
   const [selectedMood, setSelectedMood] = useState<string | null>(null);
+  const [showSleepMetric, setShowSleepMetric] = useState(false);
+  const [outdoorTracked, setOutdoorTracked] = useState(false);
 
   useEffect(() => {
     api.getMoods().then(setMoods);
@@ -47,6 +49,11 @@ export default function MoodTracker({ onNavigate }: { onNavigate?: (tab: string)
     } catch (e) {
       console.error(e);
     }
+  };
+
+  const handleTrackOutdoor = () => {
+    setOutdoorTracked(true);
+    setTimeout(() => setOutdoorTracked(false), 3000);
   };
 
   return (
@@ -101,12 +108,28 @@ export default function MoodTracker({ onNavigate }: { onNavigate?: (tab: string)
             <AreaChart data={moods}>
               <defs>
                 <linearGradient id="moodGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#10B981" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
+                  <stop offset="5%" stopColor="#8B5CF6" stopOpacity={0.3}/>
+                  <stop offset="95%" stopColor="#8B5CF6" stopOpacity={0}/>
                 </linearGradient>
               </defs>
               <XAxis dataKey="date" stroke="#ffffff10" fontSize={10} axisLine={false} tickLine={false} />
-              <YAxis domain={[0, 10]} hide />
+              <YAxis 
+                domain={[0, 10]} 
+                ticks={[2, 4, 6, 8, 10]} 
+                tickFormatter={(val) => {
+                  if (val === 10) return "Happy";
+                  if (val === 8) return "Calm";
+                  if (val === 6) return "Neutral";
+                  if (val === 4) return "Sad";
+                  if (val === 2) return "Anxious";
+                  return "";
+                }}
+                stroke="#ffffff10" 
+                fontSize={8} 
+                axisLine={false} 
+                tickLine={false} 
+                width={50}
+              />
               <Tooltip 
                 contentStyle={{ backgroundColor: "#061011", border: "1px solid #ffffff10", borderRadius: "12px" }}
                 itemStyle={{ color: "#fff", fontSize: "12px" }}
@@ -114,26 +137,33 @@ export default function MoodTracker({ onNavigate }: { onNavigate?: (tab: string)
               <Area 
                 type="monotone" 
                 dataKey="score" 
-                stroke="#10B981" 
+                stroke="#8B5CF6" 
                 strokeWidth={3} 
                 fillOpacity={1} 
                 fill="url(#moodGradient)" 
                 animationDuration={2000}
-                dot={{ fill: "#10B981", strokeWidth: 2, r: 4, stroke: "#040D0E" }}
-                activeDot={{ r: 6, stroke: "#10B981", strokeWidth: 2, fill: "white" }}
+                dot={{ fill: "#8B5CF6", strokeWidth: 2, r: 4, stroke: "#040D0E" }}
+                activeDot={{ r: 6, stroke: "#8B5CF6", strokeWidth: 2, fill: "white" }}
               />
             </AreaChart>
           </ResponsiveContainer>
         </div>
 
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-10 pt-8 border-t border-white/5 gap-6">
-          <div className="space-y-1">
-             <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/30">Intelligence Summary</h3>
-             <p className="text-xs text-white/60">You feel anxious more on exam days. Try meditation and deep breathing.</p>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-10 pt-8 border-t border-white/5 gap-6 relative">
+          <div className="space-y-4 max-w-md">
+             <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/30">Insights</h3>
+             <p className="text-xs text-white/60 leading-relaxed font-medium">You feel anxious more on exam days.<br />Try meditation and breathing exercises.</p>
+          </div>
+          <div className="hidden lg:block absolute bottom-0 right-0 w-48 h-48 pointer-events-none opacity-60">
+             <img 
+               src="https://img.freepik.com/free-vector/vector-illustration-woman-sitting-lotus-position_1284-42777.jpg" 
+               className="w-full h-full object-contain mix-blend-screen"
+               alt="Meditation"
+             />
           </div>
           <div 
             onClick={() => onNavigate?.("resources")}
-            className="w-full sm:w-auto p-4 bg-emerald-500/10 border border-emerald-500/20 py-3 px-6 rounded-2xl flex items-center justify-between sm:justify-start gap-4 group cursor-pointer hover:bg-emerald-500/20 transition-all"
+            className="w-full sm:w-auto p-4 bg-emerald-500/10 border border-emerald-500/20 py-3 px-6 rounded-2xl flex items-center justify-between sm:justify-start gap-4 group cursor-pointer hover:bg-emerald-500/20 transition-all z-10"
           >
              <div className="flex items-center gap-4">
                 <Brain className="w-5 h-5 text-emerald-400" />
@@ -152,10 +182,18 @@ export default function MoodTracker({ onNavigate }: { onNavigate?: (tab: string)
              </div>
              <span className="text-[10px] font-bold text-blue-400 uppercase tracking-widest bg-blue-500/10 px-2 py-1 rounded">Sleep Analysis</span>
            </div>
-           <h3 className="text-lg font-bold mb-2">Steady Sleep Cycle</h3>
-           <p className="text-xs text-white/40 mb-6 font-medium leading-relaxed">Your sleep score averaged 8.2 this week. Consistency is significantly improving your morning mood and cognitive focus.</p>
-           <button className="text-xs font-bold flex items-center gap-1 group-hover:gap-2 transition-all text-white/60 cursor-pointer">
-             View metrics <TrendingUp className="w-3 h-3" />
+           <h3 className="text-lg font-bold mb-2">{showSleepMetric ? "7.5h Average Sleep" : "Steady Sleep Cycle"}</h3>
+           <p className="text-xs text-white/40 mb-6 font-medium leading-relaxed">
+             {showSleepMetric 
+               ? "Your deep sleep phase increased by 15% after starting evening meditation. Heart rate variability is stable."
+               : "Your sleep score averaged 8.2 this week. Consistency is significantly improving your morning mood and cognitive focus."
+             }
+           </p>
+           <button 
+             onClick={() => setShowSleepMetric(!showSleepMetric)}
+             className="text-xs font-bold flex items-center gap-1 group-hover:gap-2 transition-all text-white/60 cursor-pointer"
+           >
+             {showSleepMetric ? "Hide details" : "View metrics"} <TrendingUp className="w-3 h-3" />
            </button>
         </GlassCard>
 
@@ -168,8 +206,15 @@ export default function MoodTracker({ onNavigate }: { onNavigate?: (tab: string)
            </div>
            <h3 className="text-lg font-bold mb-2">Afternoon Uplift</h3>
            <p className="text-xs text-white/40 mb-6 font-medium leading-relaxed">10 mins of afternoon sunlight daily increased your serotonin production by 12% this week. Keep it up!</p>
-           <button className="text-xs font-bold flex items-center gap-1 group-hover:gap-2 transition-all text-emerald-500 cursor-pointer">
-             Track outdoor time <Activity className="w-3 h-3" />
+           <button 
+             onClick={handleTrackOutdoor}
+             disabled={outdoorTracked}
+             className={cn(
+               "text-xs font-bold flex items-center gap-1 group-hover:gap-2 transition-all cursor-pointer",
+               outdoorTracked ? "text-emerald-400" : "text-emerald-500"
+             )}
+           >
+             {outdoorTracked ? "Tracked for today!" : "Track outdoor time"} <Activity className={cn("w-3 h-3", outdoorTracked && "animate-pulse")} />
            </button>
         </GlassCard>
       </div>

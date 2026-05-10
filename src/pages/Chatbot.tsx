@@ -70,10 +70,10 @@ export default function Chatbot({ specialist }: { specialist?: Specialist }) {
   };
 
   return (
-    <div className="flex flex-col gap-6 h-[calc(100vh-8rem)]">
-      <header className="flex items-center justify-between">
+    <div className="flex flex-col gap-4 h-[calc(100vh-2rem)] lg:h-[calc(100vh-4rem)]">
+      <header className="flex items-center justify-between shrink-0 px-2">
         <div className="flex items-center gap-4">
-          <h1 className="text-3xl font-bold tracking-tight">
+          <h1 className="text-2xl lg:text-3xl font-bold tracking-tight">
             {specialist ? "Counseling Session" : "AI Chatbot"}
           </h1>
           {specialist && (
@@ -133,8 +133,15 @@ export default function Chatbot({ specialist }: { specialist?: Specialist }) {
         {/* Messages */}
         <div 
           ref={scrollRef}
-          className="flex-1 overflow-y-auto p-6 space-y-8 scroll-smooth"
+          className="flex-1 overflow-y-auto p-6 space-y-8 scroll-smooth relative"
         >
+          <div className="hidden lg:block absolute bottom-8 left-8 w-40 h-40 pointer-events-none opacity-20">
+             <img 
+               src="https://cdn-icons-png.flaticon.com/512/4712/4712035.png" 
+               className="w-full h-full object-contain"
+               alt="Robot Decor"
+             />
+          </div>
           <AnimatePresence initial={false}>
             {messages.map((m, i) => (
               <motion.div
@@ -157,10 +164,10 @@ export default function Chatbot({ specialist }: { specialist?: Specialist }) {
                   )}
                 </div>
                 <div className={cn(
-                  "p-4 px-5 rounded-2xl text-sm leading-relaxed font-medium transition-all",
+                  "p-4 px-5 rounded-3xl text-sm leading-relaxed font-normal shadow-2xl transition-all",
                   m.role === "model" 
-                    ? "bg-white/5 border border-white/10 text-white/90 rounded-tl-none shadow-xl shadow-black/20" 
-                    : "bg-emerald-600/20 border border-emerald-500/30 text-white rounded-tr-none shadow-xl shadow-emerald-500/5 group"
+                    ? "bg-white/5 border border-white/10 text-white/90 rounded-tl-none shadow-black/20" 
+                    : "purple-gradient text-white rounded-tr-none shadow-emerald-500/10 group"
                 )}>
                   <div className="markdown-body">
                     <ReactMarkdown>
@@ -210,16 +217,16 @@ export default function Chatbot({ specialist }: { specialist?: Specialist }) {
                 type="submit"
                 disabled={isLoading || !input.trim()}
                 className={cn(
-                  "p-3 rounded-xl transition-all",
-                  input.trim() ? "purple-gradient text-white shadow-lg shadow-emerald-500/20" : "bg-white/5 text-white/20"
+                   "w-12 h-12 rounded-full flex items-center justify-center transition-all",
+                   input.trim() ? "purple-gradient text-white shadow-lg shadow-emerald-500/30 hover:scale-110 active:scale-95" : "bg-white/5 text-white/20"
                 )}
               >
-                <Send className="w-5 h-5" />
+                <Send className="w-5 h-5 -rotate-45 -translate-y-0.5 translate-x-0.5" />
               </button>
             </div>
           </form>
           <p className="text-[10px] text-white/20 text-center mt-4 uppercase tracking-[0.2em] font-bold">
-            {specialist ? `Session with ${specialist.name} • AI Managed Conversation` : "MindEase Platform AI • Not a replacement for clinical care"}
+            {specialist ? `Session with ${specialist.name} • AI Managed Conversation` : "MindEase AI • Not a replacement for clinical care"}
           </p>
         </div>
       </GlassCard>

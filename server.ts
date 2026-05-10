@@ -39,13 +39,90 @@ async function startServer() {
       { id: 3, title: "Managing Work Stress", category: "Stress", duration: "15 min", image: "https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&auto=format&fit=crop&q=60" },
     ],
     communityPosts: [
-      { id: 1, author: "Anonymous", text: "Today was a tough day, but I'm proud of myself for getting through it.", likes: 12, comments: 2, timestamp: "2h ago" },
-      { id: 2, author: "Anonymous", text: "Does anyone have tips for morning anxiety?", likes: 8, comments: 5, timestamp: "4h ago" },
+      { id: 1, authorId: "system-1", author: "Peer Support", text: "Today was a tough day, but I'm proud of myself for getting through it.", likes: 12, comments: 2, timestamp: "2h ago" },
+      { id: 2, authorId: "system-2", author: "MindfulBot", text: "Does anyone have tips for morning anxiety?", likes: 8, comments: 5, timestamp: "4h ago" },
     ],
     specialists: [
-      { id: "1", name: "Dr. Ananya Sharma", specialty: "Psychologist", image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=80" },
-      { id: "2", name: "Dr. Rohan Mehta", specialty: "Counsellor", image: "https://images.unsplash.com/photo-1537368910025-700350fe46c7?w=400&q=80" },
-      { id: "3", name: "Dr. Priya Patel", specialty: "Therapist", image: "https://images.unsplash.com/photo-1594824476967-48c8b964273f?w=400&q=80" },
+      { 
+        id: "1", 
+        name: "Dr. Ananya Sharma", 
+        specialty: "Psychologist", 
+        image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=80",
+        bio: "Specializing in cognitive behavioral therapy and anxiety disorders with over 12 years of experience.",
+        experience: "12 Years",
+        education: "PhD in Clinical Psychology, Stanford",
+        languages: ["English", "Hindi"]
+      },
+      { 
+        id: "2", 
+        name: "Dr. Rohan Mehta", 
+        specialty: "Counsellor", 
+        image: "https://images.unsplash.com/photo-1537368910025-700350fe46c7?w=400&q=80",
+        bio: "Expert in relationship counseling and workplace stress management.",
+        experience: "8 Years",
+        education: "M.Sc. in Counseling Psychology",
+        languages: ["English", "Gujarati"]
+      },
+      { 
+        id: "3", 
+        name: "Dr. Priya Patel", 
+        specialty: "Therapist", 
+        image: "https://images.unsplash.com/photo-1594824476967-48c8b964273f?w=400&q=80",
+        bio: "Focused on mindfulness-based stress reduction and holistic wellness.",
+        experience: "10 Years",
+        education: "MA in Psychotherapy",
+        languages: ["English", "Punjabi", "Hindi"] 
+      },
+      { 
+        id: "4", 
+        name: "Dr. David Miller", 
+        specialty: "Psychiatrist", 
+        image: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400&q=80",
+        bio: "Specialist in medication management and clinical diagnosis of mood disorders.",
+        experience: "15 Years",
+        education: "MD in Psychiatry, Johns Hopkins",
+        languages: ["English", "Spanish"] 
+      },
+      { 
+        id: "5", 
+        name: "Sarah Jenkins", 
+        specialty: "Youth Specialist", 
+        image: "https://images.unsplash.com/photo-1559839734-2b71ef197ec2?w=400&q=80",
+        bio: "Dedicated to helping teenagers and young adults navigate identity and academic pressure.",
+        experience: "6 Years",
+        education: "Master of Social Work",
+        languages: ["English"] 
+      },
+      { 
+        id: "6", 
+        name: "James Wilson", 
+        specialty: "Life Coach", 
+        image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&q=80",
+        bio: "Helping individuals achieve peak performance and personal clarity through goal-oriented coaching.",
+        experience: "7 Years",
+        education: "Certified Executive Coach",
+        languages: ["English"] 
+      },
+      { 
+        id: "7", 
+        name: "Dr. Emily Chen", 
+        specialty: "Family Therapist", 
+        image: "https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=400&q=80",
+        bio: "Specializing in family dynamics and child psychology with a focus on communication.",
+        experience: "9 Years",
+        education: "PhD in Family Therapy, UC Berkeley",
+        languages: ["English", "Mandarin"] 
+      },
+      { 
+        id: "8", 
+        name: "Robert Frost", 
+        specialty: "Trauma Specialist", 
+        image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80",
+        bio: "EMDR certified therapist focusing on PTSD and complex trauma recovery.",
+        experience: "11 Years",
+        education: "Master of Clinical Psychology",
+        languages: ["English"] 
+      },
     ]
   };
 
@@ -76,7 +153,15 @@ async function startServer() {
   });
 
   app.post("/api/community", (req, res) => {
-    const newPost = { id: db.communityPosts.length + 1, author: "Anonymous", likes: 0, comments: 0, timestamp: "Just now", ...req.body };
+    const newPost = { 
+      id: db.communityPosts.length + 1, 
+      author: req.body.author || "Anonymous", 
+      authorId: req.body.authorId || "anon",
+      likes: 0, 
+      comments: 0, 
+      timestamp: "Just now", 
+      ...req.body 
+    };
     db.communityPosts.unshift(newPost);
     res.status(201).json(newPost);
   });

@@ -60,19 +60,25 @@ export const api = {
     try {
       const q = query(
         collection(db, path), 
-        where("userId", "==", auth.currentUser.uid),
-        orderBy("timestamp", "desc")
+        where("userId", "==", auth.currentUser.uid)
       );
       const snapshot = await getDocs(q);
-      return snapshot.docs.map(doc => {
+      const docs = snapshot.docs.map(doc => {
         const data = doc.data();
         return {
           id: doc.id,
-          date: data.date,
-          mood: data.mood,
-          score: data.score
-        } as Mood;
+          ...data
+        } as any;
       });
+      // Sort in memory
+      docs.sort((a: any, b: any) => (b.timestamp?.toMillis() || 0) - (a.timestamp?.toMillis() || 0));
+      
+      return docs.map(data => ({
+        id: data.id,
+        date: data.date,
+        mood: data.mood,
+        score: data.score
+      } as Mood));
     } catch (error) {
       handleFirestoreError(error, OperationType.LIST, path);
       return [];
@@ -101,11 +107,12 @@ export const api = {
     try {
       const q = query(
         collection(db, path),
-        where("userId", "==", auth.currentUser.uid),
-        orderBy("createdAt", "desc")
+        where("userId", "==", auth.currentUser.uid)
       );
       const snapshot = await getDocs(q);
-      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Appointment));
+      const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Appointment));
+      docs.sort((a: any, b: any) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
+      return docs;
     } catch (error) {
       handleFirestoreError(error, OperationType.LIST, path);
       return [];
@@ -119,6 +126,30 @@ export const api = {
       if (snapshot.empty) {
         return [
           { 
+            id: "4", 
+            name: "Dr. David Miller", 
+            specialty: "Psychiatrist", 
+            image: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400&q=80",
+            rating: 4.9,
+            verified: true,
+            bio: "Board-certified psychiatrist with a focus on medication management and integrative psychiatry.",
+            experience: "15 Years",
+            education: "M.D. in Psychiatry, Johns Hopkins University",
+            languages: ["English", "Spanish"] 
+          },
+          { 
+            id: "5", 
+            name: "Sarah Jenkins", 
+            specialty: "Youth Support Specialist", 
+            image: "https://images.unsplash.com/photo-1559839734-2b71ef197ec2?w=400&q=80",
+            rating: 4.8,
+            verified: true,
+            bio: "Dedicated to the unique challenges faced by adolescents and young adults.",
+            experience: "6 Years",
+            education: "Master of Social Work, Columbia University",
+            languages: ["English"] 
+          },
+          { 
             id: "1", 
             name: "Dr. Ananya Sharma", 
             specialty: "Clinical Psychologist", 
@@ -129,30 +160,6 @@ export const api = {
             experience: "12 Years",
             education: "Ph.D. in Clinical Psychology, Stanford University",
             languages: ["English", "Hindi", "Punjabi"]
-          },
-          { 
-            id: "2", 
-            name: "Dr. Rohan Mehta", 
-            specialty: "Mental Wellness Counsellor", 
-            image: "https://images.unsplash.com/photo-1537368910025-700350fe46c7?w=400&q=80",
-            rating: 4.8,
-            verified: true,
-            bio: "Specializing in student mental health and career counseling. Dr. Mehta employs a combination of positive psychology and solution-focused brief therapy to help individuals build resilience and find clarity. He is known for his calm demeanor and practical strategies for managing anxiety and burnout.",
-            experience: "8 Years",
-            education: "M.A. in Applied Psychology, Delhi University",
-            languages: ["English", "Hindi", "Gujarati"]
-          },
-          { 
-            id: "3", 
-            name: "Dr. Priya Patel", 
-            specialty: "Behavioral Therapist", 
-            image: "https://images.unsplash.com/photo-1594824476967-48c8b964273f?w=400&q=80",
-            rating: 4.7,
-            verified: true,
-            bio: "Dr. Patel focuses on emotional regulation and neurodiversity support. She works closely with individuals to develop coping mechanisms and improve social-emotional skills. Her therapy sessions are a safe, non-judgmental space where clients can explore their feelings and work towards meaningful growth.",
-            experience: "6 Years",
-            education: "M.Sc. in Psychological Research, University of Edinburgh",
-            languages: ["English", "Hindi", "Marathi"]
           },
         ];
       }
@@ -265,11 +272,12 @@ export const api = {
     try {
       const q = query(
         collection(db, path),
-        where("userId", "==", auth.currentUser.uid),
-        orderBy("timestamp", "desc")
+        where("userId", "==", auth.currentUser.uid)
       );
       const snapshot = await getDocs(q);
       const moods = snapshot.docs.map(d => d.data());
+      // Sort in memory
+      moods.sort((a: any, b: any) => (b.timestamp?.toMillis() || 0) - (a.timestamp?.toMillis() || 0));
       
       const avg = moods.length ? moods.reduce((a, b) => a + (b.score || 0), 0) / moods.length : 0;
       

@@ -7,7 +7,7 @@ import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { motion } from "motion/react";
 
-export default function Profile() {
+export default function Profile({ onNavigate }: { onNavigate?: (tab: string) => void }) {
   const { user, logout } = useAuth();
   const [displayName, setDisplayName] = useState(user?.displayName || "");
   const [photoURL, setPhotoURL] = useState(user?.photoURL || "");
@@ -86,17 +86,6 @@ export default function Profile() {
                 className="w-full bg-white/5 border border-white/5 rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-emerald-500/30 transition-all font-medium"
               />
             </div>
-
-            <div className="space-y-2">
-              <label className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em] ml-1">Avatar URL</label>
-              <input 
-                type="url"
-                value={photoURL}
-                onChange={(e) => setPhotoURL(e.target.value)}
-                placeholder="https://images.unsplash.com/your-photo"
-                className="w-full bg-white/5 border border-white/5 rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-emerald-500/30 transition-all text-sm font-medium"
-              />
-            </div>
           </div>
 
           <div className="pt-4">
@@ -141,23 +130,28 @@ export default function Profile() {
           </div>
         </GlassCard>
 
-        <GlassCard className="p-6 border-white/5 bg-white/5 flex items-center gap-4 group cursor-pointer hover:bg-red-500/10 hover:border-red-500/20 transition-all">
-          <div 
-            onClick={async () => {
-              if (window.confirm("Are you sure you want to log out?")) {
+        <GlassCard 
+          onClick={async () => {
+            if (window.confirm("Are you sure you want to log out?")) {
+              try {
                 await logout();
-                window.location.href = "/";
+                if (onNavigate) {
+                  onNavigate("landing");
+                }
+              } catch (error) {
+                console.error("Logout failed:", error);
+                window.location.reload();
               }
-            }}
-            className="flex items-center gap-4 w-full"
-          >
-            <div className="w-12 h-12 bg-red-500/20 rounded-xl flex items-center justify-center text-red-500 group-hover:scale-110 transition-transform">
-              <LogOut className="w-6 h-6" />
-            </div>
-            <div className="flex-1">
-              <p className="text-[10px] uppercase font-bold text-white/30 tracking-widest">Account Session</p>
-              <p className="text-sm font-bold text-white uppercase tracking-tight">Sign Out</p>
-            </div>
+            }
+          }}
+          className="p-6 border-white/5 bg-white/5 flex items-center gap-4 group cursor-pointer hover:bg-red-500/10 hover:border-red-500/20 transition-all font-sans"
+        >
+          <div className="w-12 h-12 bg-red-500/20 rounded-xl flex items-center justify-center text-red-500 group-hover:scale-110 transition-transform">
+            <LogOut className="w-6 h-6" />
+          </div>
+          <div className="flex-1">
+            <p className="text-[10px] uppercase font-bold text-white/30 tracking-widest">Account Session</p>
+            <p className="text-sm font-bold text-white uppercase tracking-tight">Sign Out</p>
           </div>
         </GlassCard>
       </div>

@@ -39,7 +39,12 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (tab: string) =
 
   const [recentPosts, setRecentPosts] = useState<any[]>([]);
 
-  if (!data) return <div className="flex items-center justify-center h-screen"><div className="w-12 h-12 purple-gradient rounded-full animate-ping opacity-20" /></div>;
+  if (!data) return (
+    <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
+      <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+      <p className="text-emerald-500/50 text-xs font-bold uppercase tracking-widest animate-pulse">Syncing Wellness Data...</p>
+    </div>
+  );
 
   const activityData = [
     { name: "Chatbot", value: 40, color: "#10B981" },

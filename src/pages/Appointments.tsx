@@ -54,7 +54,7 @@ export default function Appointments({ onNavigate }: { onNavigate?: (tab: string
       await api.bookAppointment({
         specialistId: selectedSpecialist.id,
         specialistName: selectedSpecialist.name,
-        date: `2026-05-${selectedDate.toString().padStart(2, '0')}`,
+        date: `2025-05-${selectedDate.toString().padStart(2, '0')}`,
         time: selectedTime
       });
       setBooked(true);
@@ -183,8 +183,8 @@ export default function Appointments({ onNavigate }: { onNavigate?: (tab: string
           {/* Counselor Selection */}
           <section>
             <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/30 mb-6">Choose Counsellor</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {specialists.map((s, i) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+              {specialists.slice(0, 3).map((s, i) => (
                 <motion.div
                   key={s.id}
                   initial={{ opacity: 0, y: 20 }}
@@ -232,7 +232,7 @@ export default function Appointments({ onNavigate }: { onNavigate?: (tab: string
                    <h3 className="text-xs font-bold uppercase tracking-widest text-white/80">Select Date</h3>
                    <div className="flex items-center gap-3">
                       <button className="w-8 h-8 flex items-center justify-center hover:bg-white/5 rounded-xl transition-colors"><ChevronLeft className="w-4 h-4 text-white/40" /></button>
-                      <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-400">May 2026</span>
+                      <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-400">May Journey</span>
                       <button className="w-8 h-8 flex items-center justify-center hover:bg-white/5 rounded-xl transition-colors"><ChevronRight className="w-4 h-4 text-white/40" /></button>
                    </div>
                 </div>

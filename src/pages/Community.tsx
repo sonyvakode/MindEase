@@ -53,6 +53,7 @@ export default function Community() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeFilter, setActiveFilter] = useState("Recent");
   const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
+  const [followingAuthors, setFollowingAuthors] = useState<Set<string>>(new Set(["Peer Support"]));
   const [expandedPost, setExpandedPost] = useState<string | null>(null);
   const [comments, setComments] = useState<CommunityComment[]>([]);
   const [newComment, setNewComment] = useState("");
@@ -119,6 +120,15 @@ export default function Community() {
     });
   };
 
+  const toggleFollow = (author: string) => {
+    setFollowingAuthors(prev => {
+      const next = new Set(prev);
+      if (next.has(author)) next.delete(author);
+      else next.add(author);
+      return next;
+    });
+  };
+
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this post?")) return;
     try {
@@ -135,6 +145,9 @@ export default function Community() {
   const filteredPosts = posts.filter(post => {
     if (activeFilter === "My Posts") {
       return post.authorId === auth.currentUser?.uid;
+    }
+    if (activeFilter === "Following") {
+      return followingAuthors.has(post.author);
     }
     return true; 
   });
@@ -228,7 +241,22 @@ export default function Community() {
                         <User className="w-5 h-5 text-emerald-400" />
                       </div>
                       <div>
-                        <span className="font-bold text-sm tracking-tight">{post.author}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-sm tracking-tight">{post.author}</span>
+                          {auth.currentUser?.uid !== post.authorId && (
+                            <button 
+                              onClick={() => toggleFollow(post.author)}
+                              className={cn(
+                                "text-[8px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded transition-all",
+                                followingAuthors.has(post.author) 
+                                  ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/20" 
+                                  : "text-white/20 hover:text-emerald-400"
+                              )}
+                            >
+                              {followingAuthors.has(post.author) ? "Following" : "+ Follow"}
+                            </button>
+                          )}
+                        </div>
                         <div className="flex items-center gap-2 mt-0.5">
                            <span className="text-[9px] text-white/20 uppercase font-medium">{post.timestamp}</span>
                         </div>
