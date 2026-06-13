@@ -1,0 +1,320 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&family=Libre+Baskerville:italic@400&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Outfit", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Libre Baskerville", serif;
+  --color-primary: #6366F1;
+  --color-accent: #3B82F6;
+  --color-dark-bg: #040D0E;
+  --color-card-glass: rgba(255, 255, 255, 0.03);
+}
+
+:root {
+  --chart-text: rgba(255, 255, 255, 0.6);
+  --chart-grid: rgba(255, 255, 255, 0.05);
+}
+
+.light {
+  --chart-text: rgba(30, 41, 59, 0.7);
+  --chart-grid: rgba(30, 41, 59, 0.08);
+}
+
+@layer base {
+  body {
+    @apply bg-[#040D0E] text-white antialiased font-sans overflow-x-hidden;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-white/[0.03] backdrop-blur-3xl border border-white/5 rounded-[2rem] shadow-2xl transition-all duration-300;
+  }
+  
+  .glass-button {
+    @apply bg-white/5 hover:bg-white/10 backdrop-blur-md border border-white/10 py-2 px-4 rounded-xl transition-all duration-300 active:scale-95;
+  }
+
+  .purple-gradient {
+    @apply bg-gradient-to-br from-[#6366F1] to-[#3B82F6];
+  }
+
+  .purple-glow {
+    @apply shadow-[0_0_20px_rgba(99,102,241,0.25)];
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60;
+  }
+}
+
+/* Improve accessibility of secondary / muted text classes in Dark Mode */
+.text-white\/10 {
+  color: rgba(255, 255, 255, 0.4) !important;
+}
+.text-white\/20 {
+  color: rgba(255, 255, 255, 0.5) !important;
+}
+.text-white\/30 {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+.text-white\/40 {
+  color: rgba(255, 255, 255, 0.68) !important;
+}
+.text-white\/50 {
+  color: rgba(255, 255, 255, 0.76) !important;
+}
+.text-white\/60 {
+  color: rgba(255, 255, 255, 0.82) !important;
+}
+.text-white\/70,
+.text-white\/80 {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Prevent microscopic eye-straining text across the app, especially in mobile views */
+.text-\[8px\],
+.text-\[9px\] {
+  font-size: 11px !important;
+}
+.text-\[10px\] {
+  font-size: 11.5px !important;
+}
+
+@media (min-width: 768px) {
+  .text-\[8px\] {
+    font-size: 10px !important;
+  }
+  .text-\[9px\] {
+    font-size: 11px !important;
+  }
+  .text-\[10px\] {
+    font-size: 11px !important;
+  }
+}
+
+/* Styling Recharts text globally to make sure it is perfectly readable and clear in both light and dark mode */
+.recharts-text {
+  font-size: 11px !important;
+  font-weight: 500 !important;
+}
+
+.recharts-cartesian-axis-tick-value {
+  fill: rgba(255, 255, 255, 0.72) !important; /* highly visible in dark mode */
+}
+
+.light .recharts-cartesian-axis-tick-value {
+  fill: #334155 !important; /* very clear slate-700 in light mode */
+}
+
+.recharts-tooltip-cursor {
+  stroke: rgba(255, 255, 255, 0.1) !important;
+}
+
+.light .recharts-tooltip-cursor {
+  stroke: rgba(15, 23, 42, 0.1) !important;
+}
+
+/* Light Theme Variable & Style Overrides */
+.light {
+  background-color: #F3F6F5 !important;
+  color: #0F172A !important;
+}
+
+.light body {
+  background-color: #F3F6F5 !important;
+  color: #0F172A !important;
+}
+
+.light .glass-card {
+  background-color: rgba(255, 255, 255, 0.85) !important;
+  border-color: rgba(99, 102, 241, 0.15) !important;
+  color: #0F172A !important;
+  box-shadow: 0 10px 30px -5px rgba(99, 102, 241, 0.08), 0 4px 12px -2px rgba(99, 102, 241, 0.03) !important;
+}
+
+.light .glass-button {
+  background-color: rgba(99, 102, 241, 0.05) !important;
+  border-color: rgba(99, 102, 241, 0.15) !important;
+  color: #4F46E5 !important;
+}
+
+.light .glass-button:hover {
+  background-color: rgba(99, 102, 241, 0.1) !important;
+}
+
+/* Deep visibility contrast enforcement for all text elements in light mode */
+.light [class*="text-white"] {
+  color: #0D1424 !important; /* Elegant high-contrast slate-950 */
+}
+
+.light .text-white {
+  color: #0D1424 !important;
+}
+
+.light .text-white\/10,
+.light .text-white\/20,
+.light .text-white\/30,
+.light .text-white\/40,
+.light .text-white\/50,
+.light [class*="text-white/10"],
+.light [class*="text-white/20"],
+.light [class*="text-white/30"],
+.light [class*="text-white/40"],
+.light [class*="text-white/50"] {
+  color: #475569 !important; /* solid accessible slate-600 */
+}
+
+.light .text-white\/60,
+.light .text-white\/70,
+.light .text-white\/80,
+.light .text-white\/90,
+.light .text-white\/95,
+.light [class*="text-white/60"],
+.light [class*="text-white/70"],
+.light [class*="text-white/80"],
+.light [class*="text-white/90"],
+.light [class*="text-white/95"] {
+  color: #1E293B !important; /* solid Slate-800 */
+}
+
+.light .text-emerald-100,
+.light .text-indigo-100 {
+  color: #4F46E5 !important;
+}
+
+.light .bg-white\/5 {
+  background-color: rgba(99, 102, 241, 0.05) !important;
+}
+
+.light .bg-white\/10 {
+  background-color: rgba(99, 102, 241, 0.1) !important;
+}
+
+.light .border-white\/5 {
+  border-color: rgba(99, 102, 241, 0.08) !important;
+}
+
+.light .border-white\/10 {
+  border-color: rgba(99, 102, 241, 0.15) !important;
+}
+
+/* Maintain high-contrast white text for colored components with dark backgrounds under light mode */
+.light .purple-gradient,
+.light .purple-gradient *,
+.light .purple-gradient .text-white,
+.light .purple-gradient [class*="text-white/"],
+.light .bg-red-600,
+.light .bg-red-600 *,
+.light .bg-red-600 .text-white,
+.light .bg-red-600 [class*="text-white/"],
+.light .bg-indigo-600,
+.light .bg-indigo-600 *,
+.light .bg-indigo-600 .text-white,
+.light .bg-indigo-600 [class*="text-white/"],
+.light .bg-indigo-500,
+.light .bg-indigo-500 *,
+.light .bg-indigo-500 .text-white,
+.light .bg-indigo-500 [class*="text-white/"],
+.light .bg-emerald-500,
+.light .bg-emerald-500 *,
+.light .bg-emerald-500 .text-white,
+.light .bg-emerald-500 [class*="text-white/"],
+.light .bg-blue-500,
+.light .bg-blue-500 *,
+.light .bg-blue-500 .text-white,
+.light .bg-blue-500 [class*="text-white/"],
+.light .bg-slate-500,
+.light .bg-slate-500 *,
+.light .bg-slate-500 .text-white,
+.light .bg-slate-500 [class*="text-white/"],
+.light .bg-emerald-400,
+.light .bg-emerald-400 *,
+.light .bg-emerald-400 .text-white,
+.light .bg-emerald-400 [class*="text-white/"],
+.light .bg-amber-500,
+.light .bg-amber-500 *,
+.light .bg-amber-500 .text-white,
+.light .bg-amber-500 [class*="text-white/"] {
+  color: #FFFFFF !important;
+}
+
+.light .purple-gradient .text-white\/50,
+.light .purple-gradient .text-white\/60,
+.light .purple-gradient .text-white\/70,
+.light .purple-gradient .text-white\/40,
+.light .purple-gradient .text-white\/30,
+.light .purple-gradient .text-white\/20,
+.light .purple-gradient .text-white\/10,
+.light .bg-indigo-600 .text-white\/50,
+.light .bg-indigo-600 .text-white\/60,
+.light .bg-indigo-600 .text-white\/70,
+.light .bg-indigo-600 .text-white\/40,
+.light .bg-indigo-600 .text-white\/30,
+.light .bg-indigo-600 .text-white\/20,
+.light .bg-indigo-600 .text-white\/10,
+.light .bg-indigo-500 .text-white\/50,
+.light .bg-indigo-500 .text-white\/60,
+.light .bg-indigo-500 .text-white\/70,
+.light .bg-indigo-500 .text-white\/40,
+.light .bg-indigo-500 .text-white\/30,
+.light .bg-indigo-500 .text-white\/20,
+.light .bg-indigo-500 .text-white\/10 {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.light input, .light select, .light textarea {
+  background-color: #FFFFFF !important;
+  border-color: rgba(99, 102, 241, 0.25) !important;
+  color: #0F172A !important;
+}
+
+.light input::placeholder {
+  color: #94A3B8 !important;
+}
+
+.light nav, .light aside, .light .fixed {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(99, 102, 241, 0.1) !important;
+}
+
+.light .text-white\/40 {
+  color: #475569 !important;
+}
+
+.light svg {
+  stroke-opacity: 0.9;
+}
+
+/* Atmospheric Background */
+.atmosphere {
+  @apply fixed inset-0 pointer-events-none z-0;
+  background: 
+    radial-gradient(circle at 10% 10%, rgba(99, 102, 241, 0.1) 0%, transparent 40%),
+    radial-gradient(circle at 90% 90%, rgba(59, 130, 246, 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.05) 0%, transparent 60%);
+}
+
+.blob {
+  @apply absolute rounded-full filter blur-[100px] opacity-20 transition-all duration-[10s] animate-pulse;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-30px) scale(1.1); }
+}
+
+.animate-float {
+  animation: float 10s ease-in-out infinite;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-white/10 rounded-full hover:bg-white/20;
+}

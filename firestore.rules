@@ -1,0 +1,173 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Helpers ---
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isEmailVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isAdmin() {
+      return isEmailVerified() && (
+        request.auth.token.email == 'sonyvakode648@gmail.com'
+      );
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // --- Validation Helpers ---
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['userId', 'email']) &&
+             data.userId == request.auth.uid &&
+             data.email is string && data.email.size() <= 200;
+    }
+
+    function isValidMood(data) {
+      return data.keys().hasAll(['userId', 'mood', 'score', 'timestamp']) &&
+             data.userId == request.auth.uid &&
+             data.mood is string && data.mood.size() <= 50 &&
+             data.score is int && data.score >= 0 && data.score <= 10 &&
+             data.timestamp == request.time;
+    }
+
+    function isValidAppointment(data) {
+      return data.keys().hasAll(['userId', 'specialistId', 'date', 'time', 'status', 'createdAt']) &&
+             data.userId == request.auth.uid &&
+             data.specialistId is string &&
+             data.status in ['pending', 'confirmed', 'completed', 'cancelled'] &&
+             data.createdAt == request.time;
+    }
+
+    function isValidCommunityPost(data) {
+      return data.keys().hasAll(['authorId', 'text', 'timestamp']) &&
+             data.authorId == request.auth.uid &&
+             data.text is string && data.text.size() <= 1000 &&
+             data.timestamp == request.time;
+    }
+
+    function isValidSpecialist(data) {
+      return data.keys().hasAll(['id', 'name', 'specialty', 'image']) &&
+             data.name is string && data.specialty is string && data.image is string;
+    }
+
+    function isValidResource(data) {
+      return data.keys().hasAll(['id', 'title', 'category', 'duration', 'image']) &&
+             data.title is string && data.category is string;
+    }
+
+    function isValidComment(data) {
+      return data.keys().hasAll(['authorId', 'text', 'timestamp']) &&
+             data.authorId == request.auth.uid &&
+             data.text is string && data.text.size() <= 500 &&
+             data.timestamp == request.time;
+    }
+
+    function isValidAssessmentResult(data) {
+      return data.keys().hasAll(['userId', 'quizType', 'score', 'severity', 'certificateId', 'timestamp']) &&
+             data.userId == request.auth.uid &&
+             data.quizType in ['GAD-7', 'PHQ-9'] &&
+             data.score is int &&
+             data.severity is string && data.severity.size() <= 100 &&
+             data.certificateId is string && data.certificateId.size() <= 100 &&
+             data.timestamp == request.time;
+    }
+
+    // --- Collection Matches ---
+
+    match /test/connection {
+      allow read: if true;
+    }
+
+    // 0. Assessments
+    match /assessments/{assessmentId} {
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow get: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && isValidId(assessmentId) && isValidAssessmentResult(incoming());
+      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    // 1. Users
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidUser(incoming());
+      allow update: if isOwner(userId) && isValidUser(incoming()) &&
+                    incoming().userId == existing().userId &&
+                    incoming().email == existing().email &&
+                    incoming().diff(existing()).affectedKeys().hasOnly(['userId', 'email', 'displayName', 'photoURL', 'lastActive']);
+    }
+
+    // 2. Moods
+    match /moods/{moodId} {
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow get: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && isValidId(moodId) && isValidMood(incoming());
+      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    // 3. Specialists
+    match /specialists/{specialistId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin() && isValidSpecialist(incoming());
+    }
+
+    // 4. Appointments
+    match /appointments/{appointmentId} {
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow get: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && isValidId(appointmentId) && isValidAppointment(incoming());
+      allow update: if isSignedIn() && resource.data.userId == request.auth.uid && 
+                    isValidAppointment(incoming()) &&
+                    incoming().diff(existing()).affectedKeys().hasOnly(['status']);
+      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    // 5. Resources
+    match /resources/{resourceId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin() && isValidResource(incoming());
+    }
+
+    // 6. Community Posts
+    match /community_posts/{postId} {
+      allow list: if isSignedIn();
+      allow get: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(postId) && isValidCommunityPost(incoming());
+      allow update: if isSignedIn() && (
+        // Allow adding likes/comments
+        (incoming().diff(existing()).affectedKeys().hasOnly(['likes', 'comments'])) ||
+        (existing().authorId == request.auth.uid && incoming().diff(existing()).affectedKeys().hasOnly(['text']))
+      );
+      allow delete: if isSignedIn() && resource.data.authorId == request.auth.uid;
+
+      // Community Comments
+      match /comments/{commentId} {
+        allow list: if isSignedIn();
+        allow create: if isSignedIn() && isValidId(commentId) && isValidComment(incoming());
+        allow delete: if isSignedIn() && resource.data.authorId == request.auth.uid;
+      }
+    }
+  }
+}
