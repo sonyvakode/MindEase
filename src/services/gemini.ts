@@ -1,3 +1,5 @@
+import { GoogleGenAI } from "@google/genai";
+
 // Smart local therapeutic response generator if the Gemini server API is not configured.
 // It detects user concern keywords and yields high-quality, empathetically-paced, CBT-informed mental health responses.
 export function getLocalFallbackResponse(prompt: string, history: { role: string; parts: { text: string }[] }[] = []): string {
@@ -215,9 +217,13 @@ What are the specific statements your critic is repeating? Let's write them down
   }
 
   // 9. THERAPIST / WHAT CAN YOU DO / INTRO / GREETING
-  const greetingWords = ["hello", "hi", "hey", "yo", "greeting", "namaste", "sup", "how are you", "how are u", "how's it going", "hows it going", "good morning", "good afternoon", "good evening", "good day"];
+  const greetingWords = [
+    "hello", "hi", "hey", "yo", "hlo", "hlw", "greeting", "namaste", "sup", "how are you", 
+    "how are u", "how r u", "how's it going", "hows it going", "good morning", "good afternoon", 
+    "good evening", "good day", "helo", "heloo", "hii", "helloo"
+  ];
   const isGreeting = greetingWords.some(word => {
-    if (word === "hi" || word === "yo" || word === "sup") {
+    if (word === "hi" || word === "yo" || word === "sup" || word === "hlo" || word === "hlw") {
       return query === word || 
              query.startsWith(word + " ") || 
              query.endsWith(" " + word) || 
@@ -229,46 +235,227 @@ What are the specific statements your critic is repeating? Let's write them down
     return query.includes(word);
   });
 
-  if (
-    isGreeting ||
-    query === "start" || 
-    query.includes("who are you") || 
-    query.includes("what are you") || 
-    query.includes("features") || 
-    query.includes("capabilities") || 
-    query.includes("help me") || 
-    query.includes("anyone") ||
-    query.includes("ask") ||
-    query.includes("question")
-  ) {
-    return `### Welcome to MindEase AI Support! 👋🌱
+  const wordsCount = query.split(/\s+/).filter(Boolean).length;
 
-I am your secure, compassionate counseling assistant. I am always here to provide stress relief strategies, safe emotional offloading, and positive coping actions.
-
-Here is what we can do in our chat space anytime:
-*   🍃 **Navigate Emotional Stresses:** Simply share if you are feeling anxious, stressed, down, or angry.
-*   🌬️ **Mindfulness Practice:** Ask for customized breathing techniques, somatic grounding, or peaceful visualizations.
-*   🧠 **Cognitive Exercises:** We can analyze critical thoughts, untangle cognitive distortions, and practice behavioral reframing.
-*   💬 **General Questions:** Ask me anything! I am equipped to answer questions about mental well-being, healthy habits, sleep rituals, and constructive routines.
-
-How are you doing in this current moment? Tell me a bit about what is on your plate or what question is on your mind!`;
+  if (isGreeting) {
+    const greetings = [
+      "### Hello there! 👋 Welcome to MindEase AI.",
+      "### Hi! It is wonderful to connect with you. 🌱",
+      "### Welcome back to our calm space! ✨",
+      "### Greetings! I am here and ready to support you. 🍃"
+    ];
+    const greetingAnswer = greetings[Math.floor(Math.random() * greetings.length)];
+    return `${greetingAnswer}\n\nHow is your emotional climate or stress level today? Tell me what is on your mind, whether you'd like to vent, learn simple coping exercises, or explore dynamic mindfulness practices. I am ready to follow your lead.`;
   }
 
-  // 10. DYNAMIC REFLECTIVE ACTIVE LISTENING (ROGERS CLIENT-CENTERED RESPONSE FOR UNMATCHED USER PROMPTS)
-  return `### Exploring This Together 🍃
+  // 10. AI SPECIFIC & PERSONAL QUESTIONS
+  if (
+    query.includes("who are you") || 
+    query.includes("what are you") || 
+    query.includes("your name") || 
+    query.includes("are you a human") ||
+    query.includes("are you a therapist") ||
+    query.includes("what you do") ||
+    query.includes("features") || 
+    query.includes("capabilities")
+  ) {
+    return `### About MindEase AI 🤖✨
 
-Thank you for sharing that with me. It sounds like you are holding some very deep thoughts and feelings around **${mirrorPhrase || "what you are experiencing"}**. 
+I am **MindEase AI**, your supportive counseling and mindfulness assistant. I have been created to walk alongside you as an empathetic listener, and to suggest evidence-based tools (like CBT exercises, reframing, and somatic breathing) for routine stress management and emotional comfort.
 
-In client-led therapeutic approaches, we recognize that you are the ultimate expert on your life, and taking space to articulate your experiences is how we uncover pathways to emotional balance.
+While I am not a clinical psychotherapist or a replacement for medical emergency care, I am always a safe, non-judgmental harbor for your thoughts. How might I assist you today?`;
+  }
 
-To support us in understanding this better:
-*   What particular thoughts or old memories seem to stand out the most as you think about this?
-*   Do you notice any physical sensations (such as a tightness in your chest, a heavy stomach, or shallow breathing) reacting to this subject right now?
+  // 11. PSYCHOLOGY, COGNITIVE REFRAMING & CBT QUESTIONS
+  if (
+    query.includes("cbt") || 
+    query.includes("cognitive") || 
+    query.includes("behavio") || 
+    query.includes("distortion") || 
+    query.includes("reframe") ||
+    query.includes("thinking pattern")
+  ) {
+    return `### Understanding Cognitive Behavioral Therapy (CBT) 🧠
 
-I am fully here to listen and explore alongside you. Go at your own pace.`;
+Cognitive Behavioral Therapy (CBT) is an incredibly powerful, evidence-based modality built on a simple insight: **our thoughts, feelings, physical sensations, and actions are deeply interconnected.**
+
+Often, during times of stress, our minds naturally latch onto automatic negative thoughts (or "cognitive distortions" like *All-or-Nothing Thinking* or *Catastrophizing*). 
+
+By learning to:
+1.  🎯 **Identify** these automatic thoughts as they arise.
+2.  🔍 **Examine** them objectively (Is this 100% objective fact, or just a harsh feeling?).
+3.  🔄 **Reframe** them to a kinder, more realistic perspective.
+
+We can gradually shift our emotional state and make healthier choices. Would you like to practice reframing a challenging thought you had recently?`;
+  }
+
+  // 12. GENERAL MENTAL HEALTH & WELLNESS QUESTIONS
+  if (
+    query.includes("mental health") || 
+    query.includes("well-being") || 
+    query.includes("wellness") ||
+    query.includes("feel better") ||
+    query.includes("happier")
+  ) {
+    return `### Nurturing Your Mental Well-being 🌸
+
+Mental health is not simply the absence of stress or difficult days. It is the capacity to navigate life's inevitable waves with emotional resilience, self-compassion, and self-awareness.
+
+True mental well-being includes:
+*   ❤️ **Self-Compassion:** Embracing yourself as raw and imperfectly human.
+*   🍃 **Mindful Presence:** Responding to heavy situations with space, rather than immediate reactivity.
+*   🏃‍♂️ **Physical-Mental Harmony:** Caring for your sleep, physical movement, and hydration.
+
+Resting, taking timeouts, and using positive coping mechanisms is an admirable act of strength. What is one small, simple thing you can do for yourself today to feel supported?`;
+  }
+
+  // 13. JOKES, LAUGHTER & DISTRACTIONS
+  if (
+    query.includes("joke") || 
+    query.includes("laugh") || 
+    query.includes("funny") || 
+    query.includes("smile") ||
+    query.includes("distract")
+  ) {
+    return `### A Warm Smile For You! 😊✨
+
+Here is a lighthearted thought: 
+*"I told my physical therapist that I broke my arm in two places. They told me to stop going to those places!"*
+
+Sometimes, granting yourself permission to take a soft mental detour or share a simple laugh is exactly what your nervous system needs to de-escalate stress. What is a hobby, lighthearted movie, or favorite comfortable activity that usually makes you smile?`;
+  }
+
+  // 14. QUOTES, WISDOM & INSPIRATION
+  if (
+    query.includes("quote") || 
+    query.includes("inspiration") || 
+    query.includes("inspire") || 
+    query.includes("motivation") ||
+    query.includes("wisdom")
+  ) {
+    const quotes = [
+      "\"You don't have to control your thoughts; you just have to stop letting them control you.\" — Dan Millman",
+      "\"The greatest weapon against stress is our ability to choose one thought over another.\" — William James",
+      "\"Even the darkest night will end and the sun will rise.\" — Victor Hugo",
+      "\"Breathe in deeply to bring your mind home to your body.\" — Thich Nhat Hanh"
+    ];
+    const selectedQuote = quotes[Math.floor(Math.random() * quotes.length)];
+    return `### A Quote of Comfort & Reassurance 📜✨
+
+> ${selectedQuote}
+
+Take a deep breath and let those words gently wash over you. Remember, you do not have to carry everything all at once. Try to release any muscle tension in your shoulders or neck right now. I am here if you want to share what is on your heart.`;
+  }
+
+  // 15. HOW ARE YOU / GENERAL CHITCHAT
+  if (
+    query.includes("how are you") || 
+    query.includes("how are u") || 
+    query.includes("how r u") || 
+    query.includes("how is it going") || 
+    query.includes("hows it going") || 
+    query.includes("how you doing") ||
+    query === "hows going" ||
+    query === "hows everything"
+  ) {
+    return `### I'm Doing Great, Thank You for Asking! 🌟
+
+I am here, active, peaceful, and fully ready to hold this calm space for your emotional support and well-being. 
+
+How are *you* doing at this exact second? Let me know what concerns are on your shoulders or if you'd simply like some guidance on maintaining stable emotional flow.`;
+  }
+
+  // 16. SMART DYNAMIC CONVERSATIONAL FALLBACK (VARIED SCHEMAS SO IT NEVER FEELS REPETITIVE)
+  if (wordsCount <= 2) {
+    const briefReplies = [
+      `### I'm Right Here With You 🍃\n\nI appreciate your response. Whenever you feel comfortable, feel free to elaborate or let me know if there's a particular concern you'd like us to focus on.`,
+      `### Take Your Time 🌟\n\nI hear you. There is no rush at all in our calm space. What thought, somatic feeling, or question would you like to direct our talk towards?`,
+      `### Gentle Connection ✨\n\nUnderstood. I am holding this peaceful space for you. Feel free to use this moment to vent, ask any question about mental well-being, or let me know if we should try a short, soothing breathing exercise.`
+    ];
+    return briefReplies[Math.floor(Math.random() * briefReplies.length)];
+  }
+
+  // For multi-word unmatched entries, pull from highly reflective Rogers templates dynamically
+  const reflections = [
+    `### Reflecting on This Together 🍃
+
+Thank you for opening up to me. It sounds like you are carrying some deep reflections around **${mirrorPhrase || "your current situation"}**. 
+
+In counseling and client-led mindfulness, we view every challenge as an invitation to check in with our inner self. To help us gently unpack this:
+*   What particular memories or thoughts are staying active as you think about this?
+*   Do you notice any stress-holding areas in your physical body (like shallow chest breathing, or tightness in your stomach/shoulders)?
+
+Go gently, at your own pace. I am completely here to listen.`,
+
+    `### Unpacking and Caring 💙
+
+I hear you clearly, and I am grateful you are giving voice to these thoughts regarding **${mirrorPhrase || "what is happening"}**. Letting these words flow is often the first step in unlocking emotional relief.
+
+Let us pause for a second. Try dropping your jaw and letting your shoulders slide down. 
+*   If we were to look underneath this feeling, what do you think is the primary need trying to express itself?
+*   Would you like us to explore a simple reframing practice, or do you just need a compassionate, secure ear to hear you out?`,
+
+    `### Gentle Awareness of Your Words 🌟
+
+It makes complete sense that you are focusing on **${mirrorPhrase || "your current thoughts"}**. These details deserve safe, non-judgmental recognition.
+
+To help you anchor your mind right now:
+*   What is one compassionate, kind thing you could tell yourself regarding this matter?
+*   I am here to explore this with you completely. How can I best support you in navigating these emotions next?`
+  ];
+
+  return reflections[Math.floor(Math.random() * reflections.length)];
+}
+
+// Global caching for Google Gen AI client so we don't recreate it on every request
+let aiClientInstance: any = null;
+
+function getGeminiClient() {
+  if (!aiClientInstance) {
+    const key = process.env.GEMINI_API_KEY;
+    if (key && key !== "MY_GEMINI_API_KEY" && !key.startsWith("YOUR_") && !key.startsWith("MY_")) {
+      try {
+        aiClientInstance = new GoogleGenAI({ apiKey: key });
+      } catch (err) {
+        console.error("Failed to initialize GoogleGenAI client:", err);
+      }
+    }
+  }
+  return aiClientInstance;
 }
 
 export async function getChatResponse(prompt: string, history: { role: string; parts: { text: string }[] }[] = []) {
-  // Always immediately provide high-quality responses locally, bypassing any remote Gemini API calls/keys
+  try {
+    const client = getGeminiClient();
+    if (client) {
+      // Map history to the structured format expected by Gemini API
+      const contents = history.map(h => ({
+        role: h.role === "model" ? "model" as const : "user" as const,
+        parts: [{ text: h.parts?.[0]?.text || "" }]
+      }));
+      
+      // Add latest prompt
+      contents.push({
+        role: "user" as const,
+        parts: [{ text: prompt }]
+      });
+
+      const response = await client.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: contents,
+        config: {
+          systemInstruction: "You are MindEase AI, an empathetic, secure, and compassionate counseling assistant. Respond directly to the user's questions or feelings in a helpful, therapeutic, and warm tone. Provide constructive coping mechanisms, CBT cognitive reframing, or general well-being advice as appropriate. Always keep responses relatively concise, easy to read, and formatted with clean Markdown. Never provide formal clinical diagnoses.",
+        }
+      });
+
+      if (response && response.text) {
+        return response.text;
+      }
+    }
+  } catch (error) {
+    console.warn("Real-time Gemini API failed or is unauthorized, using healthy local conversational engine:", error);
+  }
+
+  // Immediate fallback to high-quality local dynamic counselor
   return getLocalFallbackResponse(prompt, history);
 }
