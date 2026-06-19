@@ -215,11 +215,22 @@ What are the specific statements your critic is repeating? Let's write them down
   }
 
   // 9. THERAPIST / WHAT CAN YOU DO / INTRO / GREETING
+  const greetingWords = ["hello", "hi", "hey", "yo", "greeting", "namaste", "sup", "how are you", "how are u", "how's it going", "hows it going", "good morning", "good afternoon", "good evening", "good day"];
+  const isGreeting = greetingWords.some(word => {
+    if (word === "hi" || word === "yo" || word === "sup") {
+      return query === word || 
+             query.startsWith(word + " ") || 
+             query.endsWith(" " + word) || 
+             query.includes(" " + word + " ") || 
+             query.includes(word + "!") || 
+             query.includes(word + ",") || 
+             query.includes(word + ".");
+    }
+    return query.includes(word);
+  });
+
   if (
-    query === "hello" || 
-    query === "hi" || 
-    query === "hey" || 
-    query === "yo" || 
+    isGreeting ||
     query === "start" || 
     query.includes("who are you") || 
     query.includes("what are you") || 
