@@ -44,10 +44,13 @@ export default function Landing({ onNavigate, theme, onToggleTheme }: LandingPro
       await login();
       setShowAuthModal(false);
     } catch (error: any) {
+      console.error("Google Sign-In Error:", error);
       if (error.code === 'auth/popup-closed-by-user') {
         setAuthError("Login window closed. Please try again.");
+      } else if (error.code === 'auth/unauthorized-domain') {
+        setAuthError(`Domain Unauthorized: Please add "${window.location.hostname}" to the "Authorized Domains" list in your Firebase Console under Authentication > Settings.`);
       } else {
-        setAuthError("Failed to sign in with Google.");
+        setAuthError(`Failed to sign in with Google: ${error.message || error.code || 'Please check your configuration.'}`);
       }
     }
   };
