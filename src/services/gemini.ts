@@ -425,6 +425,27 @@ function getGeminiClient() {
 }
 
 export async function getChatResponse(prompt: string, history: { role: string; parts: { text: string }[] }[] = []) {
+  // 1. Try to fetch from server-side secure /api/chat first (keeps API keys protected)
+  try {
+    const response = await fetch("/api/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ prompt, history }),
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      if (data && data.text) {
+        return data.text;
+      }
+    }
+  } catch (serverError) {
+    console.warn("Express /api/chat endpoint not reachable, attempting direct browser client connection...", serverError);
+  }
+
+  // 2. Client-side direct browser connection fallback (if server is unreachable/offline)
   try {
     const client = getGeminiClient();
     if (client) {
@@ -444,7 +465,7 @@ export async function getChatResponse(prompt: string, history: { role: string; p
         model: "gemini-2.5-flash",
         contents: contents,
         config: {
-          systemInstruction: "You are MindEase AI, an empathetic, secure, and compassionate counseling assistant. Respond directly to the user's questions or feelings in a helpful, therapeutic, and warm tone. Provide constructive coping mechanisms, CBT cognitive reframing, or general well-being advice as appropriate. Always keep responses relatively concise, easy to read, and formatted with clean Markdown. Never provide formal clinical diagnoses.",
+          systemInstruction: "You are MindEase AI, an empathetic, secure, and compassionate counseling assistant. You prioritize context-aware, highly relevant, and deeply personalized responses tailored specifically to the user's current dialogue. Do not repeat rigid pre-defined scripts or generic templates. Speak directly to the details shared by the user. Use a warm, professional, therapeutic, and active-listening human tone. Provide helpful coping mechanisms, CBT cognitive reframing, or mindfulness advice when appropriate. Always keep responses relatively concise, easy to read, and formatted with clean Markdown. Never provide formal clinical diagnoses.",
         }
       });
 
@@ -453,9 +474,9 @@ export async function getChatResponse(prompt: string, history: { role: string; p
       }
     }
   } catch (error) {
-    console.warn("Real-time Gemini API failed or is unauthorized, using healthy local conversational engine:", error);
+    console.warn("Real-time Gemini browser API failed or is unauthorized, using healthy local fallback engine:", error);
   }
 
-  // Immediate fallback to high-quality local dynamic counselor
+  // 3. Fallback to smart local reflection/CBT engine
   return getLocalFallbackResponse(prompt, history);
 }

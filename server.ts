@@ -201,22 +201,57 @@ async function startServer() {
   });
 
   app.post("/api/chat", async (req, res) => {
-    const { prompt } = req.body;
+    const { prompt, history } = req.body;
     try {
-      // Clean, immediate, local response system
-      const query = (prompt || "").toLowerCase().trim();
-      let answer = "Thank you for reaching out. Let's work together to restore calm and focus.";
-      if (query.includes("anxi") || query.includes("stress") || query.includes("panic")) {
-        answer = "It sounds like you're dealing with stress or anxiety. Please try to take slow, deep breaths, dropping your shoulders and releasing tension in your jaw.";
-      } else if (query.includes("sad") || query.includes("lonely") || query.includes("depress")) {
-        answer = "I hear you, and it is completely okay to feel down or sad. Please treat yourself with soft, active self-compassion right now.";
-      } else if (query.includes("sleep") || query.includes("night")) {
-        answer = "For quality sleep, let's practice quiet breathing and dim any blue-light screens to let your mind drift naturally.";
+      const client = getGeminiClient();
+      if (client) {
+        // Map history to the structured format expected by Gemini API
+        const contents = Array.isArray(history) 
+          ? history.map((h: any) => ({
+              role: h.role === "model" ? ("model" as const) : ("user" as const),
+              parts: [{ text: h.parts?.[0]?.text || "" }]
+            }))
+          : [];
+        
+        // Add latest prompt
+        contents.push({
+          role: "user" as const,
+          parts: [{ text: prompt || "" }]
+        });
+
+        const response = await client.models.generateContent({
+          model: "gemini-2.5-flash",
+          contents: contents,
+          config: {
+            systemInstruction: "You are MindEase AI, an empathetic, secure, and compassionate counseling assistant. You prioritize context-aware, highly relevant, and deeply personalized responses tailored specifically to the user's current dialogue. Speak directly to the specific details or questions shared by the user; NEVER repeat rigid pre-defined scripts or generic templates. Maintain a warm, encouraging, therapeutic, and active-listening human tone. Provide helpful coping mechanisms, CBT cognitive reframing, or mindfulness advice when appropriate. Always keep responses relatively concise, easy to read, and formatted with clean Markdown. Never provide formal clinical diagnoses.",
+          }
+        });
+
+        if (response && response.text) {
+          return res.json({ text: response.text });
+        }
       }
-      res.json({ text: answer });
+      
+      // Fallback if client is not available or failed
+      const query = (prompt || "").toLowerCase().trim();
+      let answer = `${prompt ? `I hear your thoughts about: "${prompt}".` : "Thank you for reaching out."} Let's check in on how you are holding up emotionally in this exact second? Let me know, and we can explore custom coping tools, CBT frames, or breathing patterns together.`;
+      if (query.includes("anxi") || query.includes("stress") || query.includes("panic")) {
+        answer = "It sounds like you're dealing with stress or anxiety. Let's practice some gentle grounding. Please take a deep breath through your nose and let it out slowly.";
+      } else if (query.includes("sad") || query.includes("lonely") || query.includes("depress")) {
+        answer = "I hear you, and it's completely okay to feel sad or lonely. I'm here to listen. Go gently at your own pace.";
+      }
+      return res.json({ text: answer });
     } catch (error: any) {
-      console.error("Chat error:", error);
-      res.status(500).json({ error: "Internal Server Error", message: "An error occurred." });
+      console.error("Chat API error:", error);
+      // Fallback
+      const query = (prompt || "").toLowerCase().trim();
+      let answer = `${prompt ? `I notice you mentioned: "${prompt}".` : "Thank you for sharing."} I am right here holding space for you. How else can we support your emotional flow right now?`;
+      if (query.includes("anxi") || query.includes("stress") || query.includes("panic")) {
+        answer = "It sounds like you're dealing with stress or anxiety. Let's practice some gentle grounding. Please take a deep breath through your nose and let it out slowly.";
+      } else if (query.includes("sad") || query.includes("lonely") || query.includes("depress")) {
+        answer = "I hear you, and it's completely okay to feel sad or lonely. I'm here to listen. Go gently at your own pace.";
+      }
+      return res.json({ text: answer });
     }
   });
 
