@@ -14,7 +14,8 @@ import {
   Shield,
   FileCheck2,
   Lock,
-  UserCheck
+  UserCheck,
+  X
 } from "lucide-react";
 import { api } from "../services/api";
 import { AssessmentResult } from "../types";
@@ -584,9 +585,11 @@ export default function Assessments() {
                 </div>
                 <button 
                   onClick={() => setSelectedCertificate(null)}
-                  className="bg-white/5 hover:bg-white/10 text-white/50 hover:text-white rounded-lg p-1.5 transition-colors cursor-pointer"
+                  className="bg-white/5 hover:bg-white/15 text-white/70 hover:text-white rounded-full p-2 transition-all cursor-pointer border border-white/10 hover:scale-105 active:scale-95 flex items-center justify-center"
+                  title="Close Certificate"
+                  id="close-cert-top-btn"
                 >
-                  ✕
+                  <X className="w-4 h-4" />
                 </button>
               </div>
 
@@ -676,9 +679,10 @@ export default function Assessments() {
                 </button>
                 <button 
                   onClick={() => setSelectedCertificate(null)}
-                  className="flex-1 bg-white/5 hover:bg-white/10 text-white/60 hover:text-white py-3.5 rounded-2xl text-xs font-bold uppercase tracking-widest transition-colors cursor-pointer text-center"
+                  className="flex-1 bg-white/5 hover:bg-white/10 text-white/80 hover:text-white py-3.5 rounded-2xl text-xs font-bold uppercase tracking-widest transition-colors cursor-pointer text-center flex items-center justify-center gap-2 border border-white/5"
+                  id="close-cert-footer-btn"
                 >
-                  Close Document
+                  <X className="w-4 h-4" /> Close Document
                 </button>
               </div>
             </motion.div>
