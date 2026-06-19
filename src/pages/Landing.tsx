@@ -55,32 +55,6 @@ export default function Landing({ onNavigate, theme, onToggleTheme }: LandingPro
     }
   };
 
-  const handleDemoLogin = async () => {
-    setAuthError(null);
-    setIsSubmitting(true);
-    const demoEmail = "demo@mindease.com";
-    const demoPassword = "demoPassword123";
-    try {
-      // First try to sign in
-      await loginWithEmail(demoEmail, demoPassword);
-      setShowAuthModal(false);
-    } catch (loginErr: any) {
-      // If the account does not exist or password is set differently, try registering it
-      if (loginErr.code === 'auth/user-not-found' || loginErr.code === 'auth/wrong-password') {
-        try {
-          await registerWithEmail(demoEmail, demoPassword);
-          setShowAuthModal(false);
-        } catch (regErr: any) {
-          setAuthError(`Demo mode activation failed: ${regErr.message || regErr.code}`);
-        }
-      } else {
-        setAuthError(`Demo mode activation failed: ${loginErr.message || loginErr.code}`);
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setAuthError(null);
@@ -257,19 +231,10 @@ export default function Landing({ onNavigate, theme, onToggleTheme }: LandingPro
 
               <button 
                 onClick={handleGoogleLogin}
-                className="w-full glass-button py-3 rounded-xl border-white/10 flex items-center justify-center gap-3 hover:bg-white/5 transition-all mb-3"
+                className="w-full glass-button py-3 rounded-xl border-white/10 flex items-center justify-center gap-3 hover:bg-white/5 transition-all mb-6"
               >
                 <img src="https://www.google.com/favicon.ico" className="w-4 h-4" alt="Google" />
                 <span className="text-sm font-medium">Google Account</span>
-              </button>
-
-              <button 
-                onClick={handleDemoLogin}
-                type="button"
-                className="w-full bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 py-3 rounded-xl flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all mb-6"
-              >
-                <Sparkles className="w-4 h-4 text-emerald-400 animate-pulse" />
-                <span className="text-sm font-bold text-emerald-400">Instant Demo / Guest Access</span>
               </button>
 
               <p className="text-center text-xs text-white/30">
